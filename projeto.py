@@ -17,24 +17,25 @@ def reset(): # Funcionando
 def esc_rank(): # funcionando
     global df_filtrado
     while True:
-        system("cls") # Limpa a tela
         print("---- Filtrando por Rank ----")
         try:
             rank = int(input("Top o que voce escolhe?"))
             df_filtrado = df_filtrado[df_filtrado['Rank']<=rank]
             list_app_filtros.append("Rank: "+ str(rank))
+            system("cls") # Limpa a tela
             break
         except ValueError:
             print("Valor invalido. Tente novamente")
 
 
 #Filtro Jogo
-def esc_game(): # Funcionando em partes 
+def esc_game(): # Funcionando em partes opt 2 com erro 
     global df_filtrado
+    global list_app_filtros
     system("cls") # Limpa a tela
     while True:
         try:
-            print("---- Filtranmdo por nome de jogo ----")
+            print("---- Filtrando por nome de jogo ----")
             print("1- Lista dos jogos\n2- Filtrar por jogos\n3- Sair")
             opt = int(input("Digite uma escolha:"))
             if opt == 1:
@@ -57,20 +58,31 @@ def esc_game(): # Funcionando em partes
             print("Opcao nao encontrada, tente de novo")
 
 #filtro mes
-def esc_mounth():  # Fazer
+def esc_Month():  # Fazer
     global df_filtrado
+    global list_app_filtros
     while True:
         try:
-            ...
+            system("cls")
+            print("---- Filtrando por Mes ----\n")
+            mes= int(input("1-Janeiro\n2-Fevereiro\n3-Marco\n4-Abril\n5-Maio\n6-Junho\n7-Julho\n8-Agosto\n9-Setembro\n10-Outubro\n11-Novembro\n12-Dezembro\nQual sua escolha?"))
+            if mes > 12 or mes < 1:
+                print("Valor invalido. Tente novamente")
+            else:
+                df_filtrado = df_filtrado[df_filtrado['Month']==mes]
+                list_app_filtros.append("Mes: "+ str(mes))
+                break
+
         except ValueError:
             print("Valor invalido. Tente novamente")
 
 #Filtro ano
 def esc_year(): # funcionando 
     global df_filtrado
+    global list_app_filtros
     while True:
         try:
-            system("cls") # Limpa a tela
+            
             print("---- Filtrando por ano ----")
             ano = int(input("Qual ano voce escolhe? (2016 - 2023)\n"))
             if ano > 2023 or ano <2016: # errado
@@ -87,6 +99,7 @@ def esc_year(): # funcionando
 def esc_hours_wath(): # Fazer
     while True:
         global df_filtrado
+        global list_app_filtros
         try:
             ...
         except ValueError:
@@ -94,18 +107,20 @@ def esc_hours_wath(): # Fazer
 
 #funcao de escolher os filtros
 def menu(): # Funcionando 
+    global df_filtrado
+    global list_app_filtros
     while True:
         try:
             print("---- Menu Principal ----")
             print("Escolha as opcoes")
             print(f"Como vamos filtrar?filtros ja aplicados: {list_app_filtros}")
-            escolha= int(input("1-Rank\n2-Game(s)\n3-Mes\n4-Ano\n5-Horas assistidas\n6-Imprimir Grafico\nEscolha:"))
+            escolha= int(input("1-Rank\n2-Game(s)\n3-Mes\n4-Ano\n5-Horas assistidas\n6-Imprimir Grafico\n7- Limpar filtros\nEscolha:"))
             if escolha == 1:
                 esc_rank()
             if escolha == 2:
                 esc_game()
             if escolha == 3:
-                esc_mounth()
+                esc_Month()
             if escolha == 4:
                 esc_year()
             if escolha == 5:
@@ -115,7 +130,7 @@ def menu(): # Funcionando
                     reset()
                 else:
                     print(df_filtrado)
-            if escolha == 7: #Reset filtros
+            if escolha == 7: #Reset filtros e tambem da um reset na base de dados
                 list_app_filtros = []
                 df_filtrado = df.copy()
             if escolha >=8 or escolha <=0:
