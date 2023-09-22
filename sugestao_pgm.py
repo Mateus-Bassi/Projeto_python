@@ -1,25 +1,93 @@
 import pandas as pd
-from os import system
+import os
 
 
-def reset(df_filtrado, lista_filtros): # Funcionando
-    print("Se resetar você deve selecionar os parâmetros para a consulta novamente!")
-    reset = input("Refazer base de dados [S/N]: ").upper()
-    if reset in ["S", "SIM"]:
-        df_filtrado = df.copy()
-        lista_filtros = []
+def aplica_filtro(df, filtros):
+    df_filtrado = df.copy()
+    
+    if 'Game' in filtros:
+        df_filtrado = df_filtrado[df_filtrado['Game'].isin(filtros['Game'])]
+    
+    if 'Rank' in filtros:
+        df_filtrado = df_filtrado[df_filtrado['Rank'] <= filtros['Rank']]
+        
+    if 'Month' in filtros:
+        df_filtrado = df_filtrado[df_filtrado['Month'].isin(filtros['Month'])]
 
-        return df_filtrado, lista_filtros
-    else:
-        pass
-        #  Creio que essa parte deve apenas preservar o DF, jogando o usuário para o menu novamente.
-
-        # print("Finalizando o programa")
-        # exit()  # Use exit() para sair do programa
+    if 'Year' in filtros:
+        df_filtrado = df_filtrado[df_filtrado['Year'].isin(filtros['Year'])]
+    
+    return df_filtrado
 
 
-def esc_game(df_filtrado, lista_filtros): 
-    system("cls") # Limpa a tela
+
+# def reset(df_filtrado, lista_filtros): # Funcionando
+#     print("Se resetar você deve selecionar os parâmetros para a consulta novamente!")
+#     reset = input("Refazer base de dados [S/N]: ").upper()
+#     if reset in ["S", "SIM"]:
+#         df_filtrado = df.copy()
+#         lista_filtros = []
+
+#         return df_filtrado, lista_filtros
+#     else:
+#         pass
+#         #  Creio que essa parte deve apenas preservar o DF, jogando o usuário para o menu novamente.
+
+#         # print("Finalizando o programa")
+#         # exit()  # Use exit() para sair do programa
+
+
+def esc_year(filtros):
+    os.system("cls" if os.name == "nt" else "clear")  # Limpa a tela
+    try:
+        while True:
+            years_input = input("Digite os anos desejados, separados por vírgulas (ex: 2020,2021,2022): ")
+            if years_input in ["2016","2017","2018","2019","2020","2021","2023"]:
+                years = [int(year.strip()) for year in years_input.split(",")]
+                filtros['Year'] = years
+                break
+            else:
+                print("Selecione um ano valido! (2016-2023)")
+                print("-"*50)
+                continue
+        
+    except ValueError:
+        print("Entrada inválida! Por favor, insira anos válidos.")
+    return filtros
+
+
+
+def esc_month(filtros):
+    os.system("cls" if os.name == "nt" else "clear")  # Limpa a tela
+    try:
+        month_input = input("Digite os meses desejados, separados por vírgulas (ex: 1,5,10): ")
+        month = [int(month.strip()) for month in month_input.split(",")]
+        filtros['Month'] = month
+    except ValueError:
+        print("Entrada inválida! Por favor, insira anos válidos.")
+    return filtros
+
+
+
+def esc_rank(filtros):
+    os.system("cls" if os.name == "nt" else "clear")
+    while True:
+        try:
+            print("---- Filtrando por Rank ----")
+            rank = int(input("Informe o top ranking desejado (exemplo: para os top 10, digite 10): "))
+            
+            # Se tudo estiver correto, adicionamos o rank ao dicionário de filtros
+            filtros['Rank'] = rank
+            
+            os.system("cls" if os.name == "nt" else "clear")
+            return filtros
+        except ValueError:
+            print("Entrada inválida! Por favor, insira um rank válido.")
+
+
+
+def esc_game(filtros):
+    os.system("cls" if os.name == "nt" else "clear") # Limpa a tela
     while True:
         try:
             print("---- Filtrando por nome de jogo ----")
@@ -37,41 +105,39 @@ def esc_game(df_filtrado, lista_filtros):
             elif opcao == 2: 
                 jogos_filtro = [jogo.strip() for jogo in input("Selecione os jogos separando por vírgula: ").split(",")]
 
-                # Crie um DataFrame vazio para armazenar os resultados das filtragens dos jogos
-                resultado_filtragem = pd.DataFrame()
-                lista_filtros.append("Jogo(s): " + ', '.join(jogos_filtro))
+                if 'Game' in filtros:
+                    filtros['Game'].extend(jogos_filtro)
+                    filtros['Game'] = list(set(filtros['Game'])) # Remove registros duplicados
+                else:
+                    filtros['Game'] = jogos_filtro # Adiciona jogo no filtro
                 
-                for jogo in jogos_filtro:
-                    jogo_df = df_filtrado[df_filtrado['Game'].str.strip() == jogo]
-                    resultado_filtragem = pd.concat([resultado_filtragem, jogo_df])
-
-                df_filtrado = resultado_filtragem
-                system("cls") # Limpa a tela
-
-                return df_filtrado, lista_filtros
+                os.system("cls" if os.name == "nt" else "clear") # Limpa a tela
+                return filtros
             
             elif opcao == 3:
-                system("cls") # Limpa a tela
-                return df_filtrado, lista_filtros
+                os.system("cls" if os.name == "nt" else "clear") # Limpa a tela
+                return filtros
 
         except ValueError:
             print("Opção não encontrada, tente de novo")
 
 
-def menu_parametros(lista_filtros):
+
+def menu_parametros(filtros):
     # Menu de escolha de parâmetros pelo usuário
     while True:
         try:
+            os.system("cls" if os.name == "nt" else "clear")
             print("---- Menu de Parâmetros ----")
             print("Escolha os parâmetros que serão usados na sua consulta:")
-            print("[1] Rank\n[2] Game(s)\n[3] Mes\n[4] Ano\n[5] Horas assistidas")
+            print("[1] Rank\n[2] Game(s)\n[3] Mes\n[4] Ano")
 
             print("-"*40)
-            print(f"Filtros aplicados: {lista_filtros}")
+            print(f"Filtros aplicados: {filtros}")
             opcao_menu= int(input("Opção: "))
 
             #  Verificado aqui se a opção é inválida. Se for, a opção não é armazenada.
-            if opcao_menu > 5 or opcao_menu <= 0:
+            if opcao_menu > 4 or opcao_menu <= 0:
                 continue
 
             return opcao_menu
@@ -79,7 +145,7 @@ def menu_parametros(lista_filtros):
             print("Valor invalido. Digite novamente")
 
 
-def menu(lista_filtros):
+def menu(filtros):
     #  Menu principal onde o usuário escolhe se quer colocar parâmetros, limpar os filtros ou imprimir os gráficos.
     while True:
         try:
@@ -87,7 +153,7 @@ def menu(lista_filtros):
             print("[1] Escolher parâmetros de consulta\n[2] Limpar filtros\n[3] Imprimir Grafico\n[4] Fechar o Programa")
 
             print("-"*40)
-            print(f"Filtros aplicados: {lista_filtros}")
+            print(f"Filtros aplicados: {filtros}")
             opcao_menu= int(input("Opção: "))
 
             #  Verificado aqui se a opção é inválida. Se for, a opção não é armazenada.
@@ -99,58 +165,53 @@ def menu(lista_filtros):
             print("Valor invalido. Digite novamente")
 
 
-df = pd.read_csv("Twitch_game_data.csv", delimiter=";", encoding="ISO-8859-1")
+df = pd.read_csv("Twitch_game_data.csv", delimiter=",", encoding="ISO-8859-1")
 df_filtrado = df.copy()
 
-lista_filtros = []
+filtros = {}
 
 while True:
-    opcao_menu = menu(lista_filtros)
+    os.system("cls" if os.name == "nt" else "clear")
+    opcao_menu = menu(filtros)
     if opcao_menu == 1:
         # Aqui ocorrerá as operações envolvendo a escolha dos parâmetros para consulta pelo usuário.
-        opcao_menu_param = menu_parametros(lista_filtros)
+        opcao_menu_param = menu_parametros(filtros)
 
         if opcao_menu_param == 1:
             # Escolha do Ranking
+            filtros = esc_rank(filtros)
             pass
         elif opcao_menu_param == 2:
             # Escolha dos games
-            df_filtrado, lista_filtros = esc_game(df_filtrado, lista_filtros)
-            pass
+            filtros = esc_game(filtros)
+            
         elif opcao_menu_param == 3:
             # Escolha do mes
-            pass
+            filtros = esc_month(filtros)
+            
         elif opcao_menu_param == 4:
             # Escolha do ano
-            pass
-        elif opcao_menu_param == 5:
-            # Escolha das horas assistidas
-            pass
-
+            filtros = esc_year(filtros)
 
     elif opcao_menu == 2:
-        # Reseta o DataFrame e a lista de filtros
-        # A função reset está retornando um elemento duplo
-        df_filtrado, lista_filtros = reset(df_filtrado, lista_filtros)
+        filtros = {} # Resetando Filtros
         print("Filtro Resetado com sucesso!")
-        input("Pressione qualquer tecla para continuar: ")
 
 
     elif opcao_menu == 3:
         # Aqui terá a parte gráfica do programa.
         # Sugestão: Criar um arquivo separado contendo as funções gráficas, e apenas referenciar elas aqui
-        if df_filtrado.empty:
-            # Se o DataFrame estiver vazio, imprimir mensagem avisando o usuário que essa opção não é possível
-            print("Não há parâmetros para a consulta. Por favor selecione os campos desejados no menu!")
-            input("Pressione qualquer tecla para ir para a tela de seleção de parâmetros: ")
-            continue
-        else:
-            # **** Colocar a parte gráfica aqui ****
-            print(df_filtrado)
+        # Se não houverem filtros, irá mostrar todo o df
+        df_filtrado = aplica_filtro	(df_filtrado, filtros)
+        print(df_filtrado)
+        print("-"*50)
+        input("Pressione qualquer tecla para voltar para o menu: ")
         ...
 
 
     if opcao_menu == 4:
         # Fechar o programa
-        pass     
+        os.system("cls" if os.name == "nt" else "clear")
+        print("Obrigado por usar o programa! =)")
+        exit()
         
