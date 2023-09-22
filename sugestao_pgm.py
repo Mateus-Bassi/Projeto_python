@@ -42,7 +42,7 @@ def esc_year(filtros):
     try:
         while True:
             years_input = input("Digite os anos desejados, separados por vírgulas (ex: 2020,2021,2022): ")
-            if years_input in ["2016","2017","2018","2019","2020","2021","2023"]:
+            if years_input in ["2016","2017","2018","2019","2020","2021","2022","2023"]:
                 years = [int(year.strip()) for year in years_input.split(",")]
                 filtros['Year'] = years
                 break
