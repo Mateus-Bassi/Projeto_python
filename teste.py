@@ -1,5 +1,37 @@
 import pandas as pd
 import os
+import matplotlib.pyplot as plt
+
+from matplotlib.ticker import FuncFormatter
+
+def top_10_jogos_ano_atual(df):
+    ano_atual = pd.Timestamp.now().year
+    df_ano_atual = df[df["Year"] == ano_atual]
+    
+    # Agregando valores para obter a soma das horas assistidas por jogo
+    df_grouped = df_ano_atual.groupby("Game")["Hours_watched"].sum().reset_index()
+
+    # Pegando os top 10 jogos
+    top_10 = df_grouped.nlargest(10, "Hours_watched")
+
+    # Plotando o gráfico
+    plt.figure(figsize=(15,7))
+    plt.barh(top_10["Game"], top_10["Hours_watched"], color="blue")
+    plt.xlabel('Horas Assistidas')
+    plt.ylabel('Jogos')
+    plt.title(f'Top 10 Jogos Mais Assistidos em {ano_atual}')
+    plt.xlim(0, top_10["Hours_watched"].max() + (0.1 * top_10["Hours_watched"].max()))
+    ax = plt.gca()
+    ax.invert_yaxis()
+    
+    # Configurando os ticks do eixo X
+    max_val = top_10["Hours_watched"].max()
+    ax.set_xticks([0, max_val/4, max_val/2, 3*max_val/4, max_val, max_val + (0.1 * max_val)])
+    
+    plt.show()
+
+
+
 
 
 def aplica_filtro(df, filtros):
@@ -19,22 +51,6 @@ def aplica_filtro(df, filtros):
     
     return df_filtrado
 
-
-
-# def reset(df_filtrado, lista_filtros): # Funcionando
-#     print("Se resetar você deve selecionar os parâmetros para a consulta novamente!")
-#     reset = input("Refazer base de dados [S/N]: ").upper()
-#     if reset in ["S", "SIM"]:
-#         df_filtrado = df.copy()
-#         lista_filtros = []
-
-#         return df_filtrado, lista_filtros
-#     else:
-#         pass
-#         #  Creio que essa parte deve apenas preservar o DF, jogando o usuário para o menu novamente.
-
-#         # print("Finalizando o programa")
-#         # exit()  # Use exit() para sair do programa
 
 
 def esc_year(filtros):
@@ -189,6 +205,27 @@ def menu(filtros):
             print("Valor invalido. Digite novamente")
 
 
+def menu_graficos():
+    while True:
+        try:
+            os.system("cls" if os.name == "nt" else "clear")
+            print("---- Menu de Gráficos ----")
+            print("Escolha entre gráficos prontos e gráficos personalizados!")
+            print("-"*40)
+            print("[1] Top 10 de cada ano\n[2] Top\n[3] Mes\n[4] Ano")
+
+            print("-"*40)
+            print(f"Filtros aplicados: {filtros}")
+            opcao_menu= int(input("Opção: "))
+
+            #  Verificado aqui se a opção é inválida. Se for, a opção não é armazenada.
+            if opcao_menu > 4 or opcao_menu <= 0:
+                continue
+
+            return opcao_menu
+        except ValueError:
+            print("Valor invalido. Digite novamente")
+
 df = pd.read_csv("Twitch_game_data.csv", delimiter=";", encoding="ISO-8859-1")
 df_filtrado = df.copy()
 
@@ -227,7 +264,8 @@ while True:
         # Sugestão: Criar um arquivo separado contendo as funções gráficas, e apenas referenciar elas aqui
         # Se não houverem filtros, irá mostrar todo o df
         df_filtrado = aplica_filtro(df_filtrado, filtros)
-        print(df_filtrado)
+        print("-"*50)
+        top_10_jogos_ano_atual(df_filtrado)
         print("-"*50)
         input("Pressione qualquer tecla para voltar para o menu: ")
         ...
