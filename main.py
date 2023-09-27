@@ -21,6 +21,8 @@ def formato_personalizado(x, pos):
     
 
 def grafico_personalizado(df):
+    # Monta o gráfico onde o usuário escolhe o eixo X
+    # O nome dos jogos sempre será o eixo Y para esse gráfico
     opcoes = {
         1: "Hours_watched",
         2: "Hours_streamed",
@@ -33,6 +35,7 @@ def grafico_personalizado(df):
 
     while True:
         try:
+            # O usuário deve escolher o ano e depois o top X jogos
             os.system("cls" if os.name == "nt" else "clear")
             ano = int(input("Ano: "))
             ranking = int(input("Top: "))
@@ -48,7 +51,6 @@ def grafico_personalizado(df):
             print("[7] Média de espectadores por canal")
             print("-"*40)
 
-
             eixo_x = int(input("Opção: "))
             
             if 1 <= eixo_x <= 7:
@@ -63,8 +65,9 @@ def grafico_personalizado(df):
             print("Entrada inválida.")
             print("-"*40)              
 
-
+    # Filtra todos os jogos do ano
     df_filtrado1 = df[df['Year'] == ano] 
+    # Filtra pelo ranking os jogos do ano escolhido
     df_filtrado1 = df_filtrado1[df_filtrado1['Rank'] <= ranking] 
     
      # Agrupa por jogo e soma as horas assistidas
@@ -72,12 +75,12 @@ def grafico_personalizado(df):
 
     for chave, valor in opcoes.items():
             if eixo_x == chave:
-                # Filtra para pegar o top 10 do ano de 2023 com base nas horas assistidas
-                df_top_10 = df_agrupado.sort_values(by=valor, ascending=False).head(ranking)
+                # Ordenando o DF pelo valor escolhido
+                df_top = df_agrupado.sort_values(by=valor, ascending=False).head(ranking)
 
                 # Plotando o gráfico
                 plt.figure(figsize=(10, 6))
-                plt.barh(df_top_10["Game"], df_top_10[valor], color='skyblue')
+                plt.barh(df_top["Game"], df_top[valor], color='skyblue')
                 plt.xlabel(valor)
                 plt.title(f"{valor} dos Top {ranking} Jogos de {ano}")
                 plt.gca().invert_yaxis()  # Inverte o eixo y para o jogo com mais horas fique no topo
@@ -86,23 +89,26 @@ def grafico_personalizado(df):
                 # A função FuncFormatter espera que a função recebida tenha dois parâmetros
                     # Arg1 = valor a ser formatado
                     # Arg2 = posição do elemento
-                formatador = FuncFormatter(formato_personalizado)
-                plt.gca().xaxis.set_major_formatter(formatador)
+                # Função para formatar os valores do Eixo X para milhares, milhões ou bilhões
+                formatador = FuncFormatter(formato_personalizado)           
 
+                # Atribuindo para o formatador padrão o formatador criado
+                plt.gca().xaxis.set_major_formatter(formatador)
                 plt.tight_layout()
                 plt.show()
 
 
+
 def grafico_top_10_horas(df):
+    #  Gráfico que mostra os TOP 10 jogos de determinado ano pelas horas assistidas
 
     ano = int(input("Ano: "))
-    # Filtra para pegar os dados do ano de 2023
-    df_2023 = df[df['Year'] == ano]
+    df_ano = df[df['Year'] == ano]
     
     # Agrupa por jogo e soma as horas assistidas
-    df_agrupado  = df_2023.groupby('Game').sum().reset_index()
+    df_agrupado  = df_ano.groupby('Game').sum().reset_index()
 
-    # Filtra para pegar o top 10 do ano de 2023 com base nas horas assistidas
+    # Ordenando o DF pelas horas assistidas
     df_top_10 = df_agrupado.sort_values(by="Hours_watched", ascending=False).head(10)
 
     # Plotando o gráfico
@@ -110,29 +116,32 @@ def grafico_top_10_horas(df):
     plt.barh(df_top_10["Game"], df_top_10["Hours_watched"], color='skyblue')
     plt.xlabel("Horas Assistidas")
     plt.title(f"Horas Assistidas dos Top 10 Jogos de {ano}")
-    plt.gca().invert_yaxis()  # Inverte o eixo y para o jogo com mais horas fique no topo
+    plt.gca().invert_yaxis()  # Inverte o eixo y para que o jogo com mais horas fique no topo
 
    
     # A função FuncFormatter espera que a função recebida tenha dois parâmetros
         # Arg1 = valor a ser formatado
         # Arg2 = posição do elemento
-    formatador = FuncFormatter(formato_personalizado)
-    plt.gca().xaxis.set_major_formatter(formatador)
+    # Função para formatar os valores do Eixo X para milhares, milhões ou bilhões
+    formatador = FuncFormatter(formato_personalizado)           
 
+    # Atribuindo para o formatador padrão o formatador criado
+    plt.gca().xaxis.set_major_formatter(formatador)
     plt.tight_layout()
     plt.show()
 
 
+
 def grafico_top_10_streamed(df):
+    #  Gráfico que mostra os TOP 10 jogos de determinado ano pelas horas de stream
 
     ano = int(input("Ano: "))
-    # Filtra para pegar os dados do ano de 2023
-    df_2023 = df[df['Year'] == ano]
+    df_ano = df[df['Year'] == ano]
     
-    # Agrupa por jogo e soma as horas assistidas
-    df_agrupado  = df_2023.groupby('Game').sum().reset_index()
+    # Agrupa por jogo e soma as horas de stream
+    df_agrupado  = df_ano.groupby('Game').sum().reset_index()
 
-    # Filtra para pegar o top 10 do ano de 2023 com base nas horas assistidas
+    # Ordenando o DF pelas horas de stream
     df_top_10 = df_agrupado.sort_values(by="Hours_streamed", ascending=False).head(10)
 
     # Plotando o gráfico
@@ -142,33 +151,34 @@ def grafico_top_10_streamed(df):
     plt.title(f"Horas streamed dos Top 10 Jogos de {ano}")
     plt.gca().invert_yaxis()  # Inverte o eixo y para o jogo com mais horas fique no topo
 
-   
     # A função FuncFormatter espera que a função recebida tenha dois parâmetros
         # Arg1 = valor a ser formatado
         # Arg2 = posição do elemento
-    formatador = FuncFormatter(formato_personalizado)
-    plt.gca().xaxis.set_major_formatter(formatador)
+    # Função para formatar os valores do Eixo X para milhares, milhões ou bilhões
+    formatador = FuncFormatter(formato_personalizado)           
 
+    # Atribuindo para o formatador padrão o formatador criado
+    plt.gca().xaxis.set_major_formatter(formatador)
     plt.tight_layout()
     plt.show()
 
 
 
 def grafico_meses_mais_assistidos(df):
+    # Gráfico que mostra os meses mais assistidos de determinado ano
 
     ano = int(input("Ano: "))
-    # Filtra para pegar os dados do ano de 2023
-    df_2023 = df[df['Year'] == ano]
+    df_ano = df[df['Year'] == ano]
     
-    # Agrupa por jogo e soma as horas assistidas
-    df_agrupado  = df_2023.groupby('Month').sum().reset_index()
+    # Agrupa por mês e por horas assitidas
+    df_agrupado  = df_ano.groupby('Month').sum().reset_index()
 
-    # Filtra para pegar o top 10 do ano de 2023 com base nas horas assistidas
-    df_top_10 = df_agrupado.sort_values(by="Hours_watched", ascending=False).head(12)
+    # Ordenando o DF pelas horas de stream
+    df_top_mes = df_agrupado.sort_values(by="Hours_watched", ascending=False).head(12)
 
     # Plotando o gráfico
     plt.figure(figsize=(10, 6))
-    plt.barh(df_top_10["Month"], df_top_10["Hours_watched"], color='skyblue')
+    plt.barh(df_top_mes["Month"], df_top_mes["Hours_watched"], color='skyblue')
     plt.xlabel("Horas assistidas")
     plt.title(f"Meses mais assistidos de {ano}")
     plt.gca().invert_yaxis()  # Inverte o eixo y para o jogo com mais horas fique no topo
@@ -186,18 +196,24 @@ def grafico_meses_mais_assistidos(df):
 
 
 def aplica_filtro(df, filtros):
+    # Filtra o DF pelo campo escolhido pelo usuário
+
     df_filtrado = df.copy()
     
     if 'Game' in filtros:
+        #  Uso de isin para filtra com base em uma lista de valores (caso escolha mais de um jogo)
         df_filtrado = df_filtrado[df_filtrado['Game'].isin(filtros['Game'])]
     
     if 'Rank' in filtros:
+        # Filtra todos os rankins que forem menor ou igual ao número escolhido pelo usuário
         df_filtrado = df_filtrado[df_filtrado['Rank'] <= filtros['Rank']]
         
     if 'Month' in filtros:
+        #  Uso de isin para filtra com base em uma lista de valores (caso escolha mais de um mes)
         df_filtrado = df_filtrado[df_filtrado['Month'].isin(filtros['Month'])]
 
     if 'Year' in filtros:
+        #  Uso de isin para filtra com base em uma lista de valores (caso escolha mais de um ano)
         df_filtrado = df_filtrado[df_filtrado['Year'].isin(filtros['Year'])]
     
     return df_filtrado
@@ -206,8 +222,9 @@ def aplica_filtro(df, filtros):
 
 
 def esc_year(filtros):
-    try:
-        while True:
+    # Recebe um dicionário filtros e adiciona uma lista com os valores dos anos que o usuário deseja
+    while True:
+        try:
             years_input = input("Digite os anos desejados, separados por vírgulas (ex: 2020,2021,2022): ")
             if years_input in ["2016","2017","2018","2019","2020","2021","2022","2023"]:
                 years = [int(year.strip()) for year in years_input.split(",")]
@@ -218,19 +235,22 @@ def esc_year(filtros):
                 print("-"*50)
                 continue
         
-    except ValueError:
-        print("Entrada inválida! Por favor, insira anos válidos.")
+        except ValueError:
+            print("Entrada inválida! Por favor, insira anos válidos.")
+
     return filtros
 
 
 
 def esc_month(filtros):
+    # Recebe um dicionário filtros e adiciona uma lista com os valores dos meses que o usuário deseja
     os.system("cls" if os.name == "nt" else "clear")
     try:
         while True:
             print("---- Filtrando por Mês ----")
             print("-"*40)
 
+            #  Dicionário para o usuário escolher o mês pelo número e o programa entender o mês referenciado
             dict_month = {1: "Janeiro",
                           2: "Fevereiro",
                           3: "Março",
@@ -269,12 +289,15 @@ def esc_month(filtros):
                     continue
             break
 
+        
         lista_temp = []
         for chave in dict_month.items():
             for mes in list_month:
                 if mes == chave[0]:
+                    # Adiciona o valor do mês na lista temporária
                     lista_temp.append(chave[1])
 
+        # Adiciona no dicionário caso a lista não esteja vazia
         if len(lista_temp) > 0:
             filtros['Month'] = lista_temp
             
@@ -285,6 +308,7 @@ def esc_month(filtros):
 
 
 def esc_rank(filtros):
+    # Recebe um dicionário filtros e adiciona o valor do TOP X que o usuário deseja
     os.system("cls" if os.name == "nt" else "clear")
     while True:
         try:
@@ -302,6 +326,8 @@ def esc_rank(filtros):
 
 
 def esc_game(filtros):
+    # Recebe um dicionário filtros e adiciona uma lista com os valores dos jogos que o usuário deseja
+
     os.system("cls" if os.name == "nt" else "clear")
     while True:
         try:
@@ -314,15 +340,18 @@ def esc_game(filtros):
             opcao = int(input("Opção:"))
 
             if opcao == 1:
+                # Mostra todos os jogos para o usuário
                 os.system("cls" if os.name == "nt" else "clear")
                 print("---- Lista de Jogos Disponíveis ----")
                 print(set(df['Game']))
                 print("-"*40)
                 input("Pressione qualquer tecla para voltar ao menu de jogos: ")
 
+
             elif opcao == 2: 
                 jogos_filtro = [jogo.strip() for jogo in input("Selecione os jogos separando por vírgula: ").split(",")]
 
+                # Adiciona o jogo sem soprepor outros jogos já selecionados
                 if 'Game' in filtros:
                     filtros['Game'].extend(jogos_filtro)
                     filtros['Game'] = list(set(filtros['Game'])) # Remove registros duplicados
@@ -333,6 +362,7 @@ def esc_game(filtros):
                 return filtros
             
             elif opcao == 3:
+                # Retorna ao menu principal
                 os.system("cls" if os.name == "nt" else "clear")
                 return filtros
 
@@ -368,7 +398,7 @@ def menu_personalizado(filtros):
     #  Menu principal onde o usuário escolhe se quer colocar parâmetros, limpar os filtros ou imprimir os gráficos.
     try:
         os.system("cls" if os.name == "nt" else "clear")
-        print("---- Menu Gráfico Personalizado ----")
+        print("---- Menu Personalizado ----")
         print("[1] Escolher filtros")
         print("[2] Limpar filtros")
         print("[3] Imprimir Consulta")
@@ -389,6 +419,8 @@ def menu_personalizado(filtros):
 
 
 def menu_graficos():
+    #  Menu de gráficos onde o usuário escolhe o tipo de gráfico que ele quer
+    #  A opção 5 é um bônus onde o usuário pode realizar uma consulta e filtrar os dados
     while True:
         try:
             os.system("cls" if os.name == "nt" else "clear")
@@ -437,7 +469,6 @@ while True:
     elif opcao_graficos == 4:
         #  Personalizado
         grafico_personalizado(df_filtrado)
-        pass
             
         
     elif opcao_graficos == 5:
@@ -471,6 +502,7 @@ while True:
 
 
             elif opcao_menu == 3:
+                # Aplica os filtros e filtra o DF
                 df_filtrado = aplica_filtro(df_filtrado, filtros)
                 print("-"*50)
                 
